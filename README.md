@@ -1,4 +1,4 @@
-# bareiron
+# bareiron-PSP
 Minimalist Minecraft server for memory-restrictive embedded systems.
 
 The goal of this project is to enable hosting Minecraft servers on very weak devices, such as the ESP32. The project's priorities are, in order: **memory usage**, **performance**, and **features**. Because of this, compliance with vanilla Minecraft is not guaranteed, nor is it a goal of the project.
