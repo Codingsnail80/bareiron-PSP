@@ -1,3 +1,5 @@
+#include <pspdebug.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -25,6 +27,11 @@
 #include "varnum.h"
 #include "procedures.h"
 #include "tools.h"
+
+
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
 
 #ifndef htonll
   static uint64_t htonll (uint64_t value) {
@@ -221,7 +228,7 @@ double readDouble (int client_fd) {
 ssize_t readLengthPrefixedData (int client_fd) {
   uint32_t length = readVarInt(client_fd);
   if (length >= MAX_RECV_BUF_LEN) {
-    printf("ERROR: Received length (%lu) exceeds maximum (%u)\n", length, MAX_RECV_BUF_LEN);
+    pspDebugScreenPrintf("ERROR: Received length (%lu) exceeds maximum (%u)\n", length, MAX_RECV_BUF_LEN);
     disconnectClient(&client_fd, -1);
     recv_count = 0;
     return 0;

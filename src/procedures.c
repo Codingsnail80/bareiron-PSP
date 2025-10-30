@@ -1,3 +1,5 @@
+#include <pspdebug.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -202,10 +204,10 @@ void disconnectClient (int *client_fd, int cause) {
   handlePlayerDisconnect(*client_fd);
   #ifdef _WIN32
   closesocket(*client_fd);
-  printf("Disconnected client %d, cause: %d, errno: %d\n", *client_fd, cause, WSAGetLastError());
+  pspDebugScreenPrintf("Disconnected client %d, cause: %d, errno: %d\n", *client_fd, cause, WSAGetLastError());
   #else
   close(*client_fd);
-  printf("Disconnected client %d, cause: %d, errno: %d\n\n", *client_fd, cause, errno);
+  pspDebugScreenPrintf("Disconnected client %d, cause: %d, errno: %d\n\n", *client_fd, cause, errno);
   #endif
   *client_fd = -1;
 }

@@ -4,6 +4,7 @@
   #include <winsock2.h>
   #include <ws2tcpip.h>
 #else
+  #include <pspsdk.h>
   #include <arpa/inet.h>
 #endif
 #include <unistd.h>

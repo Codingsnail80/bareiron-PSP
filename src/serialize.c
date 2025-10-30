@@ -1,4 +1,5 @@
 #include "globals.h"
+#include <pspdebug.h>
 
 #ifdef SYNC_WORLD_TO_DISK
 
@@ -31,7 +32,7 @@ int initSerializer () {
 
     esp_err_t ret = esp_vfs_littlefs_register(&conf);
     if (ret != ESP_OK) {
-      printf("LittleFS error %d\n", ret);
+      pspDebugScreenpspDebugScreenpspDebugScreenpspDebugScreenpspDebugScreenPrintf("LittleFS error %d\n", ret);
       perror("Failed to mount LittleFS. Aborting.");
       return 1;
     }
@@ -44,7 +45,7 @@ int initSerializer () {
     // Read block changes from the start of the file directly into memory
     size_t read = fread(block_changes, 1, sizeof(block_changes), file);
     if (read != sizeof(block_changes)) {
-      printf("Read %u bytes from \"world.bin\", expected %u (block changes). Aborting.\n", read, sizeof(block_changes));
+      pspDebugScreenPrintf("Read %u bytes from \"world.bin\", expected %u (block changes). Aborting.\n", read, sizeof(block_changes));
       fclose(file);
       return 1;
     }
@@ -64,12 +65,12 @@ int initSerializer () {
     read = fread(player_data, 1, sizeof(player_data), file);
     fclose(file);
     if (read != sizeof(player_data)) {
-      printf("Read %u bytes from \"world.bin\", expected %u (player data). Aborting.\n", read, sizeof(player_data));
+      pspDebugScreenPrintf("Read %u bytes from \"world.bin\", expected %u (player data). Aborting.\n", read, sizeof(player_data));
       return 1;
     }
 
   } else { // World file doesn't exist or failed to open
-    printf("No \"world.bin\" file found, creating one...\n\n");
+    pspDebugScreenPrintf("No \"world.bin\" file found, creating one...\n\n");
 
     // Try to create the file in binary write mode
     file = fopen(FILE_PATH, "wb");

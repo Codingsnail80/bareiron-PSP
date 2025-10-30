@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <pspdebug.h>
 
 #ifdef ESP_PLATFORM
   #include "lwip/sockets.h"
@@ -47,16 +48,16 @@ int sc_statusResponse (int client_fd) {
 
 // C->S Handshake
 int cs_handshake (int client_fd) {
-  printf("Received Handshake:\n");
+  pspDebugScreenPrintf("Received Handshake:\n");
 
-  printf("  Protocol version: %d\n", (int)readVarInt(client_fd));
+  pspDebugScreenPrintf("  Protocol version: %d\n", (int)readVarInt(client_fd));
   readString(client_fd);
   if (recv_count == -1) return 1;
-  printf("  Server address: %s\n", recv_buffer);
-  printf("  Server port: %u\n", readUint16(client_fd));
+  pspDebugScreenPrintf("  Server address: %s\n", recv_buffer);
+  pspDebugScreenPrintf("  Server port: %u\n", readUint16(client_fd));
   int intent = readVarInt(client_fd);
   if (intent == VARNUM_ERROR) return 1;
-  printf("  Intent: %d\n\n", intent);
+  pspDebugScreenPrintf("  Intent: %d\n\n", intent);
   setClientState(client_fd, intent);
 
   return 0;
@@ -64,26 +65,26 @@ int cs_handshake (int client_fd) {
 
 // C->S Login Start
 int cs_loginStart (int client_fd, uint8_t *uuid, char *name) {
-  printf("Received Login Start:\n");
+  pspDebugScreenPrintf("Received Login Start:\n");
 
   readString(client_fd);
   if (recv_count == -1) return 1;
   strncpy(name, (char *)recv_buffer, 16 - 1);
   name[16 - 1] = '\0';
-  printf("  Player name: %s\n", name);
+  pspDebugScreenPrintf("  Player name: %s\n", name);
   recv_count = recv_all(client_fd, recv_buffer, 16, false);
   if (recv_count == -1) return 1;
   memcpy(uuid, recv_buffer, 16);
-  printf("  Player UUID: ");
-  for (int i = 0; i < 16; i ++) printf("%x", uuid[i]);
-  printf("\n\n");
+  pspDebugScreenPrintf("  Player UUID: ");
+  for (int i = 0; i < 16; i ++) pspDebugScreenPrintf("%x", uuid[i]);
+  pspDebugScreenPrintf("\n\n");
 
   return 0;
 }
 
 // S->C Login Success
 int sc_loginSuccess (int client_fd, uint8_t *uuid, char *name) {
-  printf("Sending Login Success...\n\n");
+  pspDebugScreenPrintf("Sending Login Success...\n\n");
 
   uint8_t name_length = strlen(name);
   writeVarInt(client_fd, 1 + 16 + sizeVarInt(name_length) + name_length + 1);
@@ -98,44 +99,44 @@ int sc_loginSuccess (int client_fd, uint8_t *uuid, char *name) {
 
 int cs_clientInformation (int client_fd) {
   int tmp;
-  printf("Received Client Information:\n");
+  pspDebugScreenPrintf("Received Client Information:\n");
   readString(client_fd);
   if (recv_count == -1) return 1;
-  printf("  Locale: %s\n", recv_buffer);
+  pspDebugScreenPrintf("  Locale: %s\n", recv_buffer);
   tmp = readByte(client_fd);
   if (recv_count == -1) return 1;
-  printf("  View distance: %d\n", tmp);
+  pspDebugScreenPrintf("  View distance: %d\n", tmp);
   tmp = readVarInt(client_fd);
   if (recv_count == -1) return 1;
-  printf("  Chat mode: %d\n", tmp);
+  pspDebugScreenPrintf("  Chat mode: %d\n", tmp);
   tmp = readByte(client_fd);
   if (recv_count == -1) return 1;
-  if (tmp) printf("  Chat colors: on\n");
-  else printf("  Chat colors: off\n");
+  if (tmp) pspDebugScreenPrintf("  Chat colors: on\n");
+  else pspDebugScreenPrintf("  Chat colors: off\n");
   tmp = readByte(client_fd);
   if (recv_count == -1) return 1;
-  printf("  Skin parts: %d\n", tmp);
+  pspDebugScreenPrintf("  Skin parts: %d\n", tmp);
   tmp = readVarInt(client_fd);
   if (recv_count == -1) return 1;
-  if (tmp) printf("  Main hand: right\n");
-  else printf("  Main hand: left\n");
+  if (tmp) pspDebugScreenPrintf("  Main hand: right\n");
+  else pspDebugScreenPrintf("  Main hand: left\n");
   tmp = readByte(client_fd);
   if (recv_count == -1) return 1;
-  if (tmp) printf("  Text filtering: on\n");
-  else printf("  Text filtering: off\n");
+  if (tmp) pspDebugScreenPrintf("  Text filtering: on\n");
+  else pspDebugScreenPrintf("  Text filtering: off\n");
   tmp = readByte(client_fd);
   if (recv_count == -1) return 1;
-  if (tmp) printf("  Allow listing: on\n");
-  else printf("  Allow listing: off\n");
+  if (tmp) pspDebugScreenPrintf("  Allow listing: on\n");
+  else pspDebugScreenPrintf("  Allow listing: off\n");
   tmp = readVarInt(client_fd);
   if (recv_count == -1) return 1;
-  printf("  Particles: %d\n\n", tmp);
+  pspDebugScreenPrintf("  Particles: %d\n\n", tmp);
   return 0;
 }
 
 // S->C Clientbound Known Packs
 int sc_knownPacks (int client_fd) {
-  printf("Sending Server's Known Packs\n\n");
+  pspDebugScreenPrintf("Sending Server's Known Packs\n\n");
   char known_packs[] = {
     0x0e, 0x01, 0x09, 0x6d, 0x69, 0x6e,
     0x65, 0x63, 0x72, 0x61, 0x66, 0x74, 0x04, 0x63,
@@ -149,22 +150,22 @@ int sc_knownPacks (int client_fd) {
 
 // C->S Serverbound Plugin Message
 int cs_pluginMessage (int client_fd) {
-  printf("Received Plugin Message:\n");
+  pspDebugScreenPrintf("Received Plugin Message:\n");
   readString(client_fd);
   if (recv_count == -1) return 1;
-  printf("  Channel: \"%s\"\n", recv_buffer);
+  pspDebugScreenPrintf("  Channel: \"%s\"\n", recv_buffer);
   if (strcmp((char *)recv_buffer, "minecraft:brand") == 0) {
     readString(client_fd);
     if (recv_count == -1) return 1;
-    printf("  Brand: \"%s\"\n", recv_buffer);
+    pspDebugScreenPrintf("  Brand: \"%s\"\n", recv_buffer);
   }
-  printf("\n");
+  pspDebugScreenPrintf("\n");
   return 0;
 }
 
 // S->C Clientbound Plugin Message
 int sc_sendPluginMessage (int client_fd, const char *channel, const uint8_t *data, size_t data_len) {
-  printf("Sending Plugin Message\n\n");
+  pspDebugScreenPrintf("Sending Plugin Message\n\n");
   int channel_len = (int)strlen(channel);
 
   writeVarInt(client_fd, 1 + sizeVarInt(channel_len) + channel_len + sizeVarInt(data_len) + data_len);
@@ -1177,7 +1178,7 @@ int cs_chat (int client_fd) {
     int name_len = strlen(player->name);
     int text_len = message_len - text_offset;
     memmove(recv_buffer + name_len + 24, recv_buffer + text_offset, text_len);
-    snprintf((char *)recv_buffer, sizeof(recv_buffer), "§7§o%s whispers to you:", player->name);
+    pspDebugScreenPrintf((char *)recv_buffer, sizeof(recv_buffer), "§7§o%s whispers to you:", player->name);
     recv_buffer[name_len + 23] = ' ';
     // Send message to target player
     sc_systemChat(target->client_fd, (char *)recv_buffer, (uint16_t)(name_len + 24 + text_len));
@@ -1185,7 +1186,7 @@ int cs_chat (int client_fd) {
     // Format output for sending player
     int target_len = target_end_offset - target_offset;
     memmove(recv_buffer + target_len + 23, recv_buffer + name_len + 24, text_len);
-    snprintf((char *)recv_buffer, sizeof(recv_buffer), "§7§oYou whisper to %s:", target->name);
+    pspDebugScreenPrintf((char *)recv_buffer, sizeof(recv_buffer), "§7§oYou whisper to %s:", target->name);
     recv_buffer[target_len + 22] = ' ';
     // Report back to sending player
     sc_systemChat(client_fd, (char *)recv_buffer, (uint16_t)(target_len + 23 + text_len));
@@ -1333,10 +1334,10 @@ int cs_playerLoaded (int client_fd) {
 // S->C Registry Data (multiple packets) and Update Tags (configuration, multiple packets)
 int sc_registries (int client_fd) {
 
-  printf("Sending Registries\n\n");
+  pspDebugScreenPrintf("Sending Registries\n\n");
   send_all(client_fd, registries_bin, sizeof(registries_bin));
 
-  printf("Sending Tags\n\n");
+  pspDebugScreenPrintf("Sending Tags\n\n");
   send_all(client_fd, tags_bin, sizeof(tags_bin));
 
   return 0;

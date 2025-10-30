@@ -1,3 +1,13 @@
+#include <pspkernel.h>
+#include <pspdebug.h>
+#include <pspnet.h>
+#include <pspnet_inet.h>
+
+PSP_MODULE_INFO("Crafti PSP", 0, 1, 0);
+PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -116,10 +126,10 @@ void handlePacket (int client_fd, int length, int packet_id, int state) {
 
     case 0x03:
       if (state == STATE_LOGIN) {
-        printf("Client Acknowledged Login\n\n");
+        pspDebugScreenPrintf("Client Acknowledged Login\n\n");
         setClientState(client_fd, STATE_CONFIGURATION);
       } else if (state == STATE_CONFIGURATION) {
-        printf("Client Acknowledged Configuration\n\n");
+        pspDebugScreenPrintf("Client Acknowledged Configuration\n\n");
 
         // Enter client into "play" state
         setClientState(client_fd, STATE_PLAY);
@@ -164,8 +174,8 @@ void handlePacket (int client_fd, int length, int packet_id, int state) {
 
     case 0x07:
       if (state == STATE_CONFIGURATION) {
-        printf("Received Client's Known Packs\n");
-        printf("  Finishing configuration\n\n");
+        pspDebugScreenPrintf("Received Client's Known Packs\n");
+        pspDebugScreenPrintf("  Finishing configuration\n\n");
         sc_finishConfiguration(client_fd);
       }
       break;
@@ -391,7 +401,7 @@ void handlePacket (int client_fd, int length, int packet_id, int state) {
 
         int count = 0;
         #ifdef DEV_LOG_CHUNK_GENERATION
-          printf("Sending new chunks (%d, %d)\n", _x, _z);
+          pspDebugScreenPrintf("Sending new chunks (%d, %d)\n", _x, _z);
           clock_t start, end;
           start = clock();
         #endif
@@ -422,7 +432,7 @@ void handlePacket (int client_fd, int length, int packet_id, int state) {
         #ifdef DEV_LOG_CHUNK_GENERATION
           end = clock();
           double total_ms = (double)(end - start) / CLOCKS_PER_SEC * 1000;
-          printf("Generated %d chunks in %.0f ms (%.2f ms per chunk)\n", count, total_ms, total_ms / (double)count);
+          pspDebugScreenPrintf("Generated %d chunks in %.0f ms (%.2f ms per chunk)\n", count, total_ms, total_ms / (double)count);
         #endif
 
       }
@@ -462,9 +472,9 @@ void handlePacket (int client_fd, int length, int packet_id, int state) {
 
     default:
       #ifdef DEV_LOG_UNKNOWN_PACKETS
-        printf("Unknown packet: 0x");
-        if (packet_id < 16) printf("0");
-        printf("%X, length: %d, state: %d\n\n", packet_id, length, state);
+        pspDebugScreenPrintf("Unknown packet: 0x");
+        if (packet_id < 16) pspDebugScreenpspDebugScreenpspDebugScreenpspDebugScreenpspDebugScreenPrintf("0");
+        pspDebugScreenPrintf("%X, length: %d, state: %d\n\n", packet_id, length, state);
       #endif
       recv_all(client_fd, recv_buffer, length, false);
       break;
@@ -481,39 +491,40 @@ void handlePacket (int client_fd, int length, int packet_id, int state) {
 
   #ifdef DEV_LOG_LENGTH_DISCREPANCY
   if (processed_length != 0) {
-    printf("WARNING: Packet 0x");
-    if (packet_id < 16) printf("0");
-    printf("%X parsed incorrectly!\n  Expected: %d, parsed: %d\n\n", packet_id, length, processed_length);
+    pspDebugScreenPrintf("WARNING: Packet 0x");
+    if (packet_id < 16) pspDebugScreenPrintf("0");
+    pspDebugScreenPrintf("%X parsed incorrectly!\n  Expected: %d, parsed: %d\n\n", packet_id, length, processed_length);
   }
   #endif
   #ifdef DEV_LOG_UNKNOWN_PACKETS
   if (processed_length == 0) {
-    printf("Unknown packet: 0x");
-    if (packet_id < 16) printf("0");
-    printf("%X, length: %d, state: %d\n\n", packet_id, length, state);
+    pspDebugScreenPrintf("Unknown packet: 0x");
+    if (packet_id < 16) pspDebugScreenpspDebugScreenPrintf("0");
+    pspDebugScreenPrintf("%X, length: %d, state: %d\n\n", packet_id, length, state);
   }
   #endif
 
 }
 
 int main () {
+  pspDebugScreenInit();
   #ifdef _WIN32 //initialize windows socket
     WSADATA wsa;
       if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-        fprintf(stderr, "WSAStartup failed\n");
+        fpspDebugScreenPrintf(stderr, "WSAStartup failed\n");
         exit(EXIT_FAILURE);
       }
   #endif
 
   // Hash the seeds to ensure they're random enough
   world_seed = splitmix64(world_seed);
-  printf("World seed (hashed): ");
-  for (int i = 3; i >= 0; i --) printf("%X", (unsigned int)((world_seed >> (8 * i)) & 255));
+  pspDebugScreenPrintf("World seed (hashed): ");
+  for (int i = 3; i >= 0; i --) pspDebugScreenPrintf("%X", (unsigned int)((world_seed >> (8 * i)) & 255));
 
   rng_seed = splitmix64(rng_seed);
-  printf("\nRNG seed (hashed): ");
-  for (int i = 3; i >= 0; i --) printf("%X", (unsigned int)((rng_seed >> (8 * i)) & 255));
-  printf("\n\n");
+  pspDebugScreenPrintf("\nRNG seed (hashed): ");
+  for (int i = 3; i >= 0; i --) pspDebugScreenPrintf("%X", (unsigned int)((rng_seed >> (8 * i)) & 255));
+  pspDebugScreenPrintf("\n\n");
 
   // Initialize block changes entries as unallocated
   for (int i = 0; i < MAX_BLOCK_CHANGES; i ++) {
@@ -568,14 +579,14 @@ int main () {
     close(server_fd);
     exit(EXIT_FAILURE);
   }
-  printf("Server listening on port %d...\n", PORT);
+  pspDebugScreenPrintf("Server listening on port %d...\n", PORT);
 
   // Make the socket non-blocking
   // This is necessary to not starve the idle task during slow connections
   #ifdef _WIN32
     u_long mode = 1;  // 1 = non-blocking
     if (ioctlsocket(server_fd, FIONBIO, &mode) != 0) {
-      fprintf(stderr, "Failed to set non-blocking mode\n");
+      fpspDebugScreenPrintf(stderr, "Failed to set non-blocking mode\n");
       exit(EXIT_FAILURE);
     }
   #else
@@ -601,7 +612,7 @@ int main () {
       clients[i] = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);
       // If the accept was successful, make the client non-blocking too
       if (clients[i] != -1) {
-        printf("New client, fd: %d\n", clients[i]);
+        pspDebugScreenPrintf("New client, fd: %d\n", clients[i]);
       #ifdef _WIN32
         u_long mode = 1;
         ioctlsocket(clients[i], FIONBIO, &mode);
@@ -725,7 +736,7 @@ int main () {
     WSACleanup();
   #endif
 
-  printf("Server closed.\n");
+  pspDebugScreenPrintf("Server closed.\n");
 
 }
 
@@ -742,7 +753,7 @@ static void wifi_event_handler (void *arg, esp_event_base_t event_base, int32_t 
   } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
     esp_wifi_connect();
   } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-    printf("Got IP, starting server...\n\n");
+    pspDebugScreenPrintf("Got IP, starting server...\n\n");
     xTaskCreate(bareiron_main, "bareiron", 4096, NULL, 5, NULL);
   }
 }
