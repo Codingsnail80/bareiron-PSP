@@ -1,7 +1,7 @@
 # bareiron-PSP
 Minimalist Minecraft server for memory-restrictive embedded systems.
 
-The goal of this project is to enable hosting Minecraft servers on very weak devices, such as the ESP32. The project's priorities are, in order: **memory usage**, **performance**, and **features**. Because of this, compliance with vanilla Minecraft is not guaranteed, nor is it a goal of the project.
+The goal of this project is to enable hosting Minecraft servers on very weak devices, such as the PSP. The project's priorities are, in order: **memory usage**, **performance**, and **features**. Because of this, compliance with vanilla Minecraft is not guaranteed, nor is it a goal of the project.
 
 - Minecraft version: `1.21.8`
 - Protocol version: `772`
@@ -9,21 +9,8 @@ The goal of this project is to enable hosting Minecraft servers on very weak dev
 > [!WARNING]
 > Currently, only the vanilla client is officially supported. Issues have been reported when using Fabric or similar.
 
-## Quick start
-For PC x86_64 platforms, grab the [latest build binary](https://github.com/p2r3/bareiron/releases/download/latest/bareiron.exe) and run it. The file is a [Cosmopolitan polyglot](https://github.com/jart/cosmopolitan), which means it'll run on Windows, Linux, and possibly Mac, despite the file extension. Note that the server's default settings cannot be reconfigured without compiling from source.
-
-For microcontrollers, see the section on **compilation** below.
-
 ## Compilation
-Before compiling, you'll need to dump registry data from a vanilla Minecraft server. On Linux, this can be done automatically using the `extract_registries.sh` script. Otherwise, the manual process is as follows: create a folder called `notchian` here, and put a Minecraft server JAR in it. Then, follow [this guide](https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Data_Generators) to dump all of the registries (use the _second_ command with the `--all` flag). Finally, run `build_registries.js` with either [bun](https://bun.sh/), [node](https://nodejs.org/en/download), or [deno](https://docs.deno.com/runtime/getting_started/installation/).
-
-- To compile on Linux, install `gcc` and run `./build.sh`.
-- For compiling on Windows, there are a few options:
-  - To compile a native Windows binary: install [MSYS2](https://www.msys2.org/) and open the "MSYS2 MINGW64" shell. From there, run `pacman -Sy mingw-w64-x86_64-gcc`, navigate to this project's directory, and run `./build.sh`.
-  - To compile a native 32-bit binary (compatible with Windows 95/98, but why would you ever want that), use the same steps above, except with `pacman -Sy mingw-w64-cross-gcc` and `./build.sh --9x`.
-  - To compile a MSYS2-linked binary: install [MSYS2](https://www.msys2.org/), and open the "MSYS2 MSYS" shell. From there, install `gcc` (run `pacman -Sy gcc`), navigate to this project's directory and run `./build.sh`. 
-  - To compile and run a Linux binary from Windows: install WSL, and from there install `gcc` and run `./build.sh` in this project's directory.
-- To target an ESP variant, set up a PlatformIO project (select the ESP-IDF framework, **not Arduino**) and clone this repository on top of it. See **Configuration** below for further steps. For better performance, consider changing the clock speed and enabling compiler optimizations. If you don't know how to do this, there are plenty of resources online.
+Before compiling, you'll need to dump registry data from a vanilla Minecraft server. Create a folder called `notchian` in the bareiron directory, and put a Minecraft server JAR in it. Download it from here (the official download for that specific server version): https://piston-data.mojang.com/v1/objects/6bce4ef400e4efaa63a13d5e6f6b500be969ef81/server.jar Then return to the bareiron directory and run: `./extract_registries.sh` Finally, run `build_registries.js` with either [bun](https://bun.sh/), [node](https://nodejs.org/en/download), or [deno](https://docs.deno.com/runtime/getting_started/installation/). These are just javascript interpreters, there is a good chance you already have node installed. Once you have one installed the command would look like: `node build_registries.js` Next make sure you have the pspdev library installed on your system. Their offical wiki and download links are here: https://pspdev.github.io/installation.html If your operating system isn't listed then follow their instructions on compiling it. I recomend using a download if possible though. Follow their instructions on how to install the download to your system so that you can use it to compile this project. Once you have the pspdev library you need to make sure your in bareiron directory. Run: `psp-cmake .` This will generate the Makefile. Next run: `make` Once it's fished you can use the generated EBOOT.PBP. It will work in an emulator or on the physical device granted that you have custom firmware setup with the WPA2 plugin install (that plugin comes by default with the newer versions of ARK-4 firmware). Enjoy!
 
 ## Configuration
 Configuring the server requires compiling it from its source code as described in the section above.
